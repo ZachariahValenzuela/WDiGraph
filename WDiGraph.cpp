@@ -15,8 +15,7 @@ WDiGraph::WDiGraph(int n) : numOfVertices(n), numOfEdges(0)
 
 WDiGraph::WDiGraph(const WDiGraph& graph) 
 {
-  //adjList.resize(graph.getNumVertices());
-  *this = graph;
+   *this = graph;
 }//end copy constructor
 
 bool WDiGraph::edgeExists(int start, int end) const
@@ -129,12 +128,33 @@ bool WDiGraph::remove(int start, int end)
 	return ableToRemove;
 }  // end remove
 
-bool WDiGraph::topoSortDFS(WDiGraph& graph)
+bool WDiGraph::topoSortDFSRecurse(int vertex, vector<bool> visited)
 {
-  curListPosition.clear();
-	curListPosition = adjList;
-		
-	return false;
+  if(visited[vertex] == true)
+    return false;
+  visited[vertex] = true;
+  vector<int> nextVertices = getNextVertex(vertex);
+  if(nextVertices.size() == 0)
+  { 
+    int nextVertex = getFirstVertex();
+    if(nextVertex < 0)
+      return true;
+    else 
+      nextVertices.resize(1, nextVertex);
+  }
+  for(auto &nextVertex: nextVertices)
+    if(!topoSortDFSRecurse(nextVertex, visited))
+      return false;
+  
+  return true;
+}
+
+bool WDiGraph::topoSortDFS()
+{
+	vector<bool> visited;
+  visited.resize(numOfVertices, false);
+  
+	return topoSortDFSRecurse(getFirstVertex(), visited);
 }
 
 bool WDiGraph::topoSortSR(WDiGraph& graph)
@@ -148,52 +168,17 @@ int WDiGraph::getFirstVertex()
 {
   for(int i = 0; i < getNumVertices(); i++)
   {
-    if(adjList[i] != nullptr)
+    if(curListPosition[i] != nullptr)
       return i;
 	}
-  return - 1;
+  return -1;
 }
 
-WDiGraph& WDiGraph::getNextVertex()
+vector<int> WDiGraph::getNextVertex(int vertex)
 {
-  int index = getFirstVertex();
-  if(index > 0)
-  {
-    shared_ptr<WGraphNode<int, int>> origChainPtr = adjList[index];  // Points to original chain
-  
-    //if list is empty
-    if (origChainPtr == nullptr)
-      adjList[index] = nullptr;  // Original WGraphNode is empty
-    else
-    {
-      // Copy first WGraphNode
-      adjList[index] = make_shared<WGraphNode<int, int>>(origChainPtr->getVertex(), origChainPtr->getWeight(), origChainPtr->getNext()); 
-	  
-      // Copy remaining WGraphNodes
-      shared_ptr<WGraphNode<int, int>> newChainPtr = adjList[index];
-      origChainPtr = origChainPtr->getNext();  // Advance original-chain pointer
-      while (origChainPtr != nullptr)
-      {
-        // Get next vertex and weight from original chain
-        int vertex = origChainPtr->getVertex();
-        int weight = origChainPtr->getWeight();
-        shared_ptr<WGraphNode<int, int>> nextPtr = origChainPtr->getNext();
-         
-        // Create a new WGraphNode containing the next item
-        shared_ptr<WGraphNode<int, int>> newWGraphNodePtr = make_shared<WGraphNode<int, int>>(vertex, weight, nextPtr);
-    
-        // Link new WGraphNode to end of new chain
-        newChainPtr->setNext(newWGraphNodePtr);
-    
-        // Advance pointer to new last WGraphNode
-        newChainPtr = newChainPtr->getNext();
-        // Advance original-chain pointer
-        origChainPtr = origChainPtr->getNext();
-      }// end while
-      newChainPtr->setNext(nullptr); // Flag end of chain
-    }
-	}
-  return *this;
+  vector<int> nextVertex;
+   
+  return nextVertex;
 }
 
 WDiGraph& WDiGraph::operator=(const WDiGraph& rhs)

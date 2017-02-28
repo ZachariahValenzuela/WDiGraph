@@ -31,6 +31,9 @@ int main()
   displayGraph(myGraph);
 	cout << "Number of Vertices in graph: " << graph2->getNumVertices() << endl;
 	displayGraph(graph2);
+  auto graph3 = make_shared<WDiGraph>(*graph2);
+  displayGraph(graph3);
+  
 	return 0;
 }  // end main
 

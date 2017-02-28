@@ -32,11 +32,9 @@ public:
   bool remove(int start, int end);
   bool edgeExists(int start, int end) const;
   int getEdgeWeight(int start, int end) const;
-	bool topoSortDFS(WDiGraph& graph);
-	bool topoSortSR(WDiGraph& graph);
-	int getFirstVertex();
-	WDiGraph& getNextVertex();
-
+	bool topoSortDFS();
+  bool topoSortSR(WDiGraph& graph);
+	
   /** Assignment operator overload for deep copy of rhs graph 
    * @pre The lhs and rhs graphs exist
    * @post The lhs graph is deallocated and now contains the rhs graph*/
@@ -45,8 +43,12 @@ public:
 private:
   int numOfVertices;  /** Number of vertices in the graph. */
   int numOfEdges;     /** Number of edges in the graph. */
-  std::vector<std::shared_ptr<WGraphNode<int, int>>> adjList;
-	std::vector<std::shared_ptr<WGraphNode<int, int>>> curListPosition;
+  int getFirstVertex();
+	vector<int> getNextVertex(int vertex);
+  bool topoSortDFSRecurse(int vertex, vector<bool> visited);
+  vector<shared_ptr<WGraphNode<int, int>>> adjList;
+	vector<shared_ptr<WGraphNode<int, int>>> curListPosition;
+  
 }; //end WDiGraph
 
 #endif
