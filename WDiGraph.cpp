@@ -15,7 +15,7 @@ WDiGraph::WDiGraph(int n) : numOfVertices(n), numOfEdges(0)
 
 WDiGraph::WDiGraph(const WDiGraph& graph) 
 {
-  adjList.resize(graph.getNumVertices());
+  //adjList.resize(graph.getNumVertices());
   *this = graph;
 }//end copy constructor
 
@@ -77,15 +77,17 @@ int WDiGraph::getEdgeWeight(int start, int end) const
 
 bool WDiGraph::add(int start, int end, int w)
 {
- cout << "in" << endl;
- //validation
-  if(!edgeExists(start, end) && start != end && w > 0 && start >= 0 && 
-     start - 1 < getNumVertices() && end >= 0 && end - 1 < getNumVertices()) 
+  if(edgeExists(start, end))
     return false;
-  cout << "past if" << endl;
+  if(start == end)
+    return false;
+  if(start < 0 || start > getNumVertices() - 1)
+    return false;
+  if(end < 0 || end > getNumVertices() - 1)
+    return false;
   //make a node and insert into front of chain
   shared_ptr<WGraphNode<int,int>> edge = make_shared<WGraphNode<int, int>>(end, w, adjList[start]);
-	
+  adjList[start] = edge;
   //increment numOfEdges
   numOfEdges++;
 	return true;
@@ -127,42 +129,115 @@ bool WDiGraph::remove(int start, int end)
 	return ableToRemove;
 }  // end remove
 
+bool WDiGraph::topoSortDFS(WDiGraph& graph)
+{
+  curListPosition.clear();
+	curListPosition = adjList;
+		
+	return false;
+}
+
+bool WDiGraph::topoSortSR(WDiGraph& graph)
+{
+  curListPosition.clear();
+	curListPosition = adjList;
+	return false;
+}
+
+int WDiGraph::getFirstVertex()
+{
+  for(int i = 0; i < getNumVertices(); i++)
+  {
+    if(adjList[i] != nullptr)
+      return i;
+	}
+  return - 1;
+}
+
+WDiGraph& WDiGraph::getNextVertex()
+{
+  int index = getFirstVertex();
+  if(index > 0)
+  {
+    shared_ptr<WGraphNode<int, int>> origChainPtr = adjList[index];  // Points to original chain
+  
+    //if list is empty
+    if (origChainPtr == nullptr)
+      adjList[index] = nullptr;  // Original WGraphNode is empty
+    else
+    {
+      // Copy first WGraphNode
+      adjList[index] = make_shared<WGraphNode<int, int>>(origChainPtr->getVertex(), origChainPtr->getWeight(), origChainPtr->getNext()); 
+	  
+      // Copy remaining WGraphNodes
+      shared_ptr<WGraphNode<int, int>> newChainPtr = adjList[index];
+      origChainPtr = origChainPtr->getNext();  // Advance original-chain pointer
+      while (origChainPtr != nullptr)
+      {
+        // Get next vertex and weight from original chain
+        int vertex = origChainPtr->getVertex();
+        int weight = origChainPtr->getWeight();
+        shared_ptr<WGraphNode<int, int>> nextPtr = origChainPtr->getNext();
+         
+        // Create a new WGraphNode containing the next item
+        shared_ptr<WGraphNode<int, int>> newWGraphNodePtr = make_shared<WGraphNode<int, int>>(vertex, weight, nextPtr);
+    
+        // Link new WGraphNode to end of new chain
+        newChainPtr->setNext(newWGraphNodePtr);
+    
+        // Advance pointer to new last WGraphNode
+        newChainPtr = newChainPtr->getNext();
+        // Advance original-chain pointer
+        origChainPtr = origChainPtr->getNext();
+      }// end while
+      newChainPtr->setNext(nullptr); // Flag end of chain
+    }
+	}
+  return *this;
+}
+
 WDiGraph& WDiGraph::operator=(const WDiGraph& rhs)
 {
-	adjList.resize(rhs.getNumVertices());
-	shared_ptr<WGraphNode<int, int>> origChainPtr = rhs.adjList[0];  // Points to original chain
-  
-  //if list is empty
-  if (origChainPtr == nullptr)
-    adjList[0] = nullptr;  // Original WGraphNode is empty
-  else
+  numOfVertices = rhs.getNumVertices();
+  numOfEdges = rhs.getNumEdges();
+  adjList.clear(); //remove all data in adjList
+	adjList.resize(numOfVertices, nullptr);
+  for(int v = 0; v < numOfVertices; v++)
   {
-		// Copy first WGraphNode
-		shared_ptr<WGraphNode<int, int>> headPtr = adjList[0];
-    
-    // Copy remaining WGraphNodes
-    shared_ptr<WGraphNode<int, int>> newChainPtr = headPtr;
-    origChainPtr = origChainPtr->getNext();  // Advance original-chain pointer
-    while (origChainPtr != nullptr)
+    shared_ptr<WGraphNode<int, int>> origChainPtr = rhs.adjList[v];  // Points to original chain
+  
+    //if list is empty
+    if (origChainPtr == nullptr)
+      adjList[v] = nullptr;  // Original WGraphNode is empty
+    else
     {
-			// Get next vertex and weight from original chain
-			int vertex = origChainPtr->getVertex();
-			int weight = origChainPtr->getWeight();
-      shared_ptr<WGraphNode<int, int>> nextPtr = origChainPtr->getNext();
+      // Copy first WGraphNode
+      adjList[v] = make_shared<WGraphNode<int, int>>(origChainPtr->getVertex(), origChainPtr->getWeight(), origChainPtr->getNext()); 
+	    
+      // Copy remaining WGraphNodes
+      shared_ptr<WGraphNode<int, int>> newChainPtr = adjList[v];
+      origChainPtr = origChainPtr->getNext();  // Advance original-chain pointer
+      while (origChainPtr != nullptr)
+      {
+        // Get next vertex and weight from original chain
+        int vertex = origChainPtr->getVertex();
+        int weight = origChainPtr->getWeight();
+        shared_ptr<WGraphNode<int, int>> nextPtr = origChainPtr->getNext();
            
-      // Create a new WGraphNode containing the next item
-      shared_ptr<WGraphNode<int, int>> newWGraphNodePtr = make_shared<WGraphNode<int, int>>(vertex, weight, nextPtr);
+        // Create a new WGraphNode containing the next item
+        shared_ptr<WGraphNode<int, int>> newWGraphNodePtr = make_shared<WGraphNode<int, int>>(vertex, weight, nextPtr);
       
-      // Link new WGraphNode to end of new chain
-      newChainPtr->setNext(newWGraphNodePtr);
+        // Link new WGraphNode to end of new chain
+        newChainPtr->setNext(newWGraphNodePtr);
       
-      // Advance pointer to new last WGraphNode
-      newChainPtr = newChainPtr->getNext();
+        // Advance pointer to new last WGraphNode
+        newChainPtr = newChainPtr->getNext();
 
-      // Advance original-chain pointer
-      origChainPtr = origChainPtr->getNext();
-    }// end while
-    newChainPtr->setNext(nullptr); // Flag end of chain
-	}
-  return *this;//Overload operator =
+        // Advance original-chain pointer
+        origChainPtr = origChainPtr->getNext();
+      }// end while
+      newChainPtr->setNext(nullptr); // Flag end of chain
+    }
+  }
+  return *this;
 }

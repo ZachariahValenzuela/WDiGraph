@@ -17,18 +17,20 @@ void displayGraph(const shared_ptr<WDiGraph> &graphPtr);
 int main()
 {
   shared_ptr<WDiGraph> myGraph = make_shared<WDiGraph>();
+  readGraph(myGraph);
   cout << "Testing Graph . . . ." << endl << endl ;
 	testGraph(myGraph);
 	
   /*read graph from file and display it
 	*/
-  readGraph(myGraph);
+ 
   cout << "Number of Vertices in graph: " << myGraph->getNumVertices() << endl;
-  shared_ptr<WDiGraph> graph2 = myGraph;
-	displayGraph(myGraph);
-	
-	
-	//displayGraph(graph2);
+  //shared_ptr<WDiGraph> graph2 = myGraph;
+  auto graph2 = make_shared<WDiGraph>(*myGraph);
+	myGraph->remove(3,2);
+  displayGraph(myGraph);
+	cout << "Number of Vertices in graph: " << graph2->getNumVertices() << endl;
+	displayGraph(graph2);
 	return 0;
 }  // end main
 
@@ -37,7 +39,6 @@ int main()
 */
 void testGraph(shared_ptr<WDiGraph> &graphPtr)
 {
-	cout << "in test" << endl;	
 	//test add function
   graphPtr->add(3,2,1);
   cout << "Number of edges in graph:" << graphPtr->getNumEdges() << endl;
@@ -47,7 +48,7 @@ void testGraph(shared_ptr<WDiGraph> &graphPtr)
     cout << "edge exists with weight: " << graphPtr->getEdgeWeight(3,2) << endl;
     
   //test remove function
-  graphPtr->remove(3,2);
+  //graphPtr->remove(3,2);
   cout << "Number of edges in graph:" << graphPtr->getNumEdges() << endl;
   cout << "Number of vertices in graph:" << graphPtr->getNumVertices() << endl;
 }
