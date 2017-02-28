@@ -13,6 +13,7 @@ using namespace std;
 void testGraph(shared_ptr<WDiGraph> &graphPtr);
 void readGraph(shared_ptr<WDiGraph> &graphPtr);
 void displayGraph(const shared_ptr<WDiGraph> &graphPtr);
+void displayTopoSort(shared_ptr<WDiGraph> &graphPtr);
 
 int main()
 {
@@ -31,8 +32,8 @@ int main()
   displayGraph(myGraph);
 	cout << "Number of Vertices in graph: " << graph2->getNumVertices() << endl;
 	displayGraph(graph2);
-  auto graph3 = make_shared<WDiGraph>(*graph2);
-  displayGraph(graph3);
+  auto graph3 = make_shared<WDiGraph>(*myGraph);
+  graph3->topoSortDFS();
   
 	return 0;
 }  // end main
@@ -113,3 +114,9 @@ void displayGraph(const shared_ptr<WDiGraph> &graphPtr)
     cout << endl;
   }//end for
 }//end displayGraph
+
+void displayTopoSort(shared_ptr<WDiGraph> &graphPtr);
+{
+  
+  
+}

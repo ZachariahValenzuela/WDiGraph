@@ -19,7 +19,7 @@ public:
   /** Default Constructor (default size is 10 vertices) 
     * @pre The graph is empty.
     * @post The graph is initialized to hold n vertices. */
-  WDiGraph(int n=10);              
+  WDiGraph(int n = 10);              
 
   /** Copy Constructor
     * @param graph - the graph to copy. */
@@ -45,11 +45,13 @@ private:
   int numOfEdges;     /** Number of edges in the graph. */
   int getFirstVertex();
 	vector<int> getNextVertex(int vertex);
-  bool topoSortDFSRecurse(int vertex, vector<bool> visited);
+  bool topoSortDFSRecurse(int vertex);
   vector<shared_ptr<WGraphNode<int, int>>> adjList;
 	vector<shared_ptr<WGraphNode<int, int>>> curListPosition;
+  vector<bool> visited;
   
 }; //end WDiGraph
 
 #endif
+
 

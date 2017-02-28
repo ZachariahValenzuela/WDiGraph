@@ -11,6 +11,8 @@ using namespace std;
 WDiGraph::WDiGraph(int n) : numOfVertices(n), numOfEdges(0)
 {
 	adjList.resize(n, nullptr);
+  visited.resize(n, false);
+
 } //end constuctor     
 
 WDiGraph::WDiGraph(const WDiGraph& graph) 
@@ -128,33 +130,39 @@ bool WDiGraph::remove(int start, int end)
 	return ableToRemove;
 }  // end remove
 
-bool WDiGraph::topoSortDFSRecurse(int vertex, vector<bool> visited)
+bool WDiGraph::topoSortDFSRecurse(int vertex)
 {
+  cout << "in DFS recurse: " << vertex << endl;
   if(visited[vertex] == true)
     return false;
   visited[vertex] = true;
   vector<int> nextVertices = getNextVertex(vertex);
   if(nextVertices.size() == 0)
   { 
+    cout << "in the if" << endl;
     int nextVertex = getFirstVertex();
     if(nextVertex < 0)
       return true;
     else 
+    {
       nextVertices.resize(1, nextVertex);
+    }
   }
-  for(auto &nextVertex: nextVertices)
-    if(!topoSortDFSRecurse(nextVertex, visited))
-      return false;
+  
+   cout << endl;
+  for(auto &nextVertex: nextVertices)  
+    if(!topoSortDFSRecurse(nextVertex))
+      for(int i = 0; i < numOfVertices; i++)
+        if(!visited[i])
+          return topoSortDFSRecurse(i);
+    return false;
   
   return true;
 }
 
 bool WDiGraph::topoSortDFS()
 {
-	vector<bool> visited;
-  visited.resize(numOfVertices, false);
-  
-	return topoSortDFSRecurse(getFirstVertex(), visited);
+	return topoSortDFSRecurse(getFirstVertex());
 }
 
 bool WDiGraph::topoSortSR(WDiGraph& graph)
@@ -166,9 +174,9 @@ bool WDiGraph::topoSortSR(WDiGraph& graph)
 
 int WDiGraph::getFirstVertex()
 {
-  for(int i = 0; i < getNumVertices(); i++)
+  for(int i = 0; i < numOfVertices; i++)
   {
-    if(curListPosition[i] != nullptr)
+    if(!visited[i] && adjList[i] != nullptr)
       return i;
 	}
   return -1;
@@ -176,9 +184,14 @@ int WDiGraph::getFirstVertex()
 
 vector<int> WDiGraph::getNextVertex(int vertex)
 {
-  vector<int> nextVertex;
-   
-  return nextVertex;
+  vector<int> nextVertices = vector<int>();
+  
+	for(shared_ptr<WGraphNode<int, int>> curPtr = adjList[vertex]; curPtr != nullptr; curPtr = curPtr->getNext())
+  {
+    nextVertices.push_back(curPtr->getVertex());
+  }
+
+  return nextVertices;
 }
 
 WDiGraph& WDiGraph::operator=(const WDiGraph& rhs)
@@ -187,6 +200,7 @@ WDiGraph& WDiGraph::operator=(const WDiGraph& rhs)
   numOfEdges = rhs.getNumEdges();
   adjList.clear(); //remove all data in adjList
 	adjList.resize(numOfVertices, nullptr);
+  visited.resize(numOfVertices, false);
   for(int v = 0; v < numOfVertices; v++)
   {
     shared_ptr<WGraphNode<int, int>> origChainPtr = rhs.adjList[v];  // Points to original chain
